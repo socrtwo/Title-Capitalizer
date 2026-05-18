@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Title Capitalizer</title>
+
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script src="../lib/titlecase.js"></script>
+    <link rel="stylesheet" href="taskpane.css" />
+</head>
+
+<body class="ms-font-m ms-Fabric">
+    <header>
+        <h1>Title Capitalizer</h1>
+        <p class="subtitle">Apply title case to your selected text using popular style guides.</p>
+    </header>
+
+    <main>
+        <section class="panel">
+            <label for="styleSelect">Style guide</label>
+            <select id="styleSelect" aria-label="Title case style guide">
+                <option value="ap">AP Style</option>
+                <option value="apa">APA Style</option>
+                <option value="chicago">Chicago Style</option>
+                <option value="mla">MLA Style</option>
+                <option value="nyt">New York Times Style</option>
+                <option value="wikipedia">Wikipedia Style</option>
+                <option value="bluebook">Bluebook Style</option>
+                <option value="ama">AMA Style</option>
+            </select>
+            <p id="styleDescription" class="hint"></p>
+        </section>
+
+        <section class="panel">
+            <label>Other case conversions</label>
+            <div class="button-grid">
+                <button type="button" class="case-btn" data-conversion="sentence">Sentence case</button>
+                <button type="button" class="case-btn" data-conversion="lower">lowercase</button>
+                <button type="button" class="case-btn" data-conversion="upper">UPPERCASE</button>
+                <button type="button" class="case-btn" data-conversion="first">First Letter</button>
+                <button type="button" class="case-btn" data-conversion="alternating">aLtErNaTiNg</button>
+                <button type="button" class="case-btn" data-conversion="toggle">tOGGLE cASE</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <label>Options</label>
+            <div class="checkbox-row">
+                <input type="checkbox" id="preserveAcronyms" checked />
+                <label for="preserveAcronyms">Preserve ALL-CAPS acronyms (NASA, HTML, ...)</label>
+            </div>
+            <div class="checkbox-row">
+                <input type="checkbox" id="straightQuotes" />
+                <label for="straightQuotes">Convert smart quotes &ldquo; &rdquo; to straight quotes " "</label>
+            </div>
+            <div class="checkbox-row">
+                <input type="checkbox" id="smartQuotes" />
+                <label for="smartQuotes">Convert straight quotes " " to smart quotes &ldquo; &rdquo;</label>
+            </div>
+        </section>
+
+        <section class="panel">
+            <label for="inputText">Preview / manual input</label>
+            <textarea id="inputText" rows="3" placeholder="Type or paste a title here, or use the buttons below to convert your selection in the document."></textarea>
+            <label for="outputText" class="output-label">Result</label>
+            <textarea id="outputText" rows="3" readonly placeholder="Converted text will appear here."></textarea>
+            <div class="button-row">
+                <button type="button" id="previewBtn" class="primary">Preview</button>
+                <button type="button" id="copyBtn">Copy result</button>
+            </div>
+        </section>
+
+        <section class="panel actions">
+            <button type="button" id="applyToSelection" class="primary big">Apply title case to selection</button>
+            <p class="hint" id="hostHint"></p>
+            <p id="statusMessage" class="status" role="status" aria-live="polite"></p>
+        </section>
+
+        <footer>
+            <p>Inspired by <a href="https://capitalizemytitle.com" target="_blank" rel="noopener noreferrer">Capitalize My Title</a>.</p>
+        </footer>
+    </main>
+
+    <script src="taskpane.js"></script>
+</body>
+</html>
