@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp
+        xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+        xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+        xsi:type="TaskPaneApp">
+
+  <!--
+    Title Capitalizer - an Office Add-in that title-cases the active
+    selection in Word, Excel, or PowerPoint using AP, APA, Chicago, MLA,
+    NY Times, Wikipedia, Bluebook, or AMA style. The same add-in runs in
+    Office on Windows, Mac, the Web, and iPad.
+
+    The Id below identifies this add-in to Office. Replace it if you
+    publish your own fork.
+  -->
+  <Id>9b3d2c40-7d8a-4b2e-9b1d-1f6a2c4d8e10</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>socrtwo</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Title Capitalizer" />
+  <Description DefaultValue="Capitalize titles in Word, Excel, and PowerPoint using AP, APA, Chicago, MLA, NY Times, Wikipedia, Bluebook, or AMA style." />
+  <IconUrl DefaultValue="https://socrtwo.github.io/Title-Capitalizer/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://socrtwo.github.io/Title-Capitalizer/assets/icon-80.png" />
+  <SupportUrl DefaultValue="https://github.com/socrtwo/Title-Capitalizer" />
+
+  <!-- Domains the add-in is allowed to navigate to inside its iframe. -->
+  <AppDomains>
+    <AppDomain>https://socrtwo.github.io</AppDomain>
+  </AppDomains>
+
+  <!-- Supported Office hosts. -->
+  <Hosts>
+    <Host Name="Document" />
+    <Host Name="Workbook" />
+    <Host Name="Presentation" />
+  </Hosts>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://socrtwo.github.io/Title-Capitalizer/src/taskpane/taskpane.html" />
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <!--
+    VersionOverrides upgrade the add-in to the richer add-in command
+    model: ribbon buttons, function commands, etc. Each host gets its
+    own customization block under VersionOverridesV1_1.
+  -->
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <!-- ============================================================ -->
+      <!-- Word                                                         -->
+      <!-- ============================================================ -->
+      <Host xsi:type="Document">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title" />
+            <Description resid="GetStarted.Description" />
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl" />
+          </GetStarted>
+          <FunctionFile resid="Commands.Url" />
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="TitleCapitalizer.Group.Word">
+                <Label resid="GroupLabel" />
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16" />
+                  <bt:Image size="32" resid="Icon.32x32" />
+                  <bt:Image size="80" resid="Icon.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="TitleCapitalizer.OpenTaskPane.Word">
+                  <Label resid="OpenTaskPane.Label" />
+                  <Supertip>
+                    <Title resid="OpenTaskPane.Label" />
+                    <Description resid="OpenTaskPane.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+                <Control xsi:type="Menu" id="TitleCapitalizer.QuickMenu.Word">
+                  <Label resid="QuickStyle.Label" />
+                  <Supertip>
+                    <Title resid="QuickStyle.Label" />
+                    <Description resid="QuickStyle.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Items>
+                    <Item id="TitleCapitalizer.QuickAP.Word">
+                      <Label resid="Style.AP.Label" />
+                      <Supertip><Title resid="Style.AP.Label" /><Description resid="Style.AP.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyAP</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickAPA.Word">
+                      <Label resid="Style.APA.Label" />
+                      <Supertip><Title resid="Style.APA.Label" /><Description resid="Style.APA.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyAPA</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickChicago.Word">
+                      <Label resid="Style.Chicago.Label" />
+                      <Supertip><Title resid="Style.Chicago.Label" /><Description resid="Style.Chicago.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyChicago</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickMLA.Word">
+                      <Label resid="Style.MLA.Label" />
+                      <Supertip><Title resid="Style.MLA.Label" /><Description resid="Style.MLA.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyMLA</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickNYT.Word">
+                      <Label resid="Style.NYT.Label" />
+                      <Supertip><Title resid="Style.NYT.Label" /><Description resid="Style.NYT.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyNYT</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickWiki.Word">
+                      <Label resid="Style.Wiki.Label" />
+                      <Supertip><Title resid="Style.Wiki.Label" /><Description resid="Style.Wiki.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyWikipedia</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickBB.Word">
+                      <Label resid="Style.BB.Label" />
+                      <Supertip><Title resid="Style.BB.Label" /><Description resid="Style.BB.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyBluebook</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickAMA.Word">
+                      <Label resid="Style.AMA.Label" />
+                      <Supertip><Title resid="Style.AMA.Label" /><Description resid="Style.AMA.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyAMA</FunctionName></Action>
+                    </Item>
+                  </Items>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+
+      <!-- ============================================================ -->
+      <!-- Excel                                                        -->
+      <!-- ============================================================ -->
+      <Host xsi:type="Workbook">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title" />
+            <Description resid="GetStarted.Description" />
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl" />
+          </GetStarted>
+          <FunctionFile resid="Commands.Url" />
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="TitleCapitalizer.Group.Excel">
+                <Label resid="GroupLabel" />
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16" />
+                  <bt:Image size="32" resid="Icon.32x32" />
+                  <bt:Image size="80" resid="Icon.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="TitleCapitalizer.OpenTaskPane.Excel">
+                  <Label resid="OpenTaskPane.Label" />
+                  <Supertip>
+                    <Title resid="OpenTaskPane.Label" />
+                    <Description resid="OpenTaskPane.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+                <Control xsi:type="Menu" id="TitleCapitalizer.QuickMenu.Excel">
+                  <Label resid="QuickStyle.Label" />
+                  <Supertip>
+                    <Title resid="QuickStyle.Label" />
+                    <Description resid="QuickStyle.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Items>
+                    <Item id="TitleCapitalizer.QuickAP.Excel">
+                      <Label resid="Style.AP.Label" />
+                      <Supertip><Title resid="Style.AP.Label" /><Description resid="Style.AP.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyAP</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickAPA.Excel">
+                      <Label resid="Style.APA.Label" />
+                      <Supertip><Title resid="Style.APA.Label" /><Description resid="Style.APA.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyAPA</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickChicago.Excel">
+                      <Label resid="Style.Chicago.Label" />
+                      <Supertip><Title resid="Style.Chicago.Label" /><Description resid="Style.Chicago.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyChicago</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickMLA.Excel">
+                      <Label resid="Style.MLA.Label" />
+                      <Supertip><Title resid="Style.MLA.Label" /><Description resid="Style.MLA.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyMLA</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickNYT.Excel">
+                      <Label resid="Style.NYT.Label" />
+                      <Supertip><Title resid="Style.NYT.Label" /><Description resid="Style.NYT.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyNYT</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickWiki.Excel">
+                      <Label resid="Style.Wiki.Label" />
+                      <Supertip><Title resid="Style.Wiki.Label" /><Description resid="Style.Wiki.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyWikipedia</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickBB.Excel">
+                      <Label resid="Style.BB.Label" />
+                      <Supertip><Title resid="Style.BB.Label" /><Description resid="Style.BB.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyBluebook</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickAMA.Excel">
+                      <Label resid="Style.AMA.Label" />
+                      <Supertip><Title resid="Style.AMA.Label" /><Description resid="Style.AMA.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyAMA</FunctionName></Action>
+                    </Item>
+                  </Items>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+
+      <!-- ============================================================ -->
+      <!-- PowerPoint                                                   -->
+      <!-- ============================================================ -->
+      <Host xsi:type="Presentation">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title" />
+            <Description resid="GetStarted.Description" />
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl" />
+          </GetStarted>
+          <FunctionFile resid="Commands.Url" />
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="TitleCapitalizer.Group.PPT">
+                <Label resid="GroupLabel" />
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16" />
+                  <bt:Image size="32" resid="Icon.32x32" />
+                  <bt:Image size="80" resid="Icon.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="TitleCapitalizer.OpenTaskPane.PPT">
+                  <Label resid="OpenTaskPane.Label" />
+                  <Supertip>
+                    <Title resid="OpenTaskPane.Label" />
+                    <Description resid="OpenTaskPane.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+                <Control xsi:type="Menu" id="TitleCapitalizer.QuickMenu.PPT">
+                  <Label resid="QuickStyle.Label" />
+                  <Supertip>
+                    <Title resid="QuickStyle.Label" />
+                    <Description resid="QuickStyle.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Items>
+                    <Item id="TitleCapitalizer.QuickAP.PPT">
+                      <Label resid="Style.AP.Label" />
+                      <Supertip><Title resid="Style.AP.Label" /><Description resid="Style.AP.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyAP</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickAPA.PPT">
+                      <Label resid="Style.APA.Label" />
+                      <Supertip><Title resid="Style.APA.Label" /><Description resid="Style.APA.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyAPA</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickChicago.PPT">
+                      <Label resid="Style.Chicago.Label" />
+                      <Supertip><Title resid="Style.Chicago.Label" /><Description resid="Style.Chicago.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyChicago</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickMLA.PPT">
+                      <Label resid="Style.MLA.Label" />
+                      <Supertip><Title resid="Style.MLA.Label" /><Description resid="Style.MLA.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyMLA</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickNYT.PPT">
+                      <Label resid="Style.NYT.Label" />
+                      <Supertip><Title resid="Style.NYT.Label" /><Description resid="Style.NYT.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyNYT</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickWiki.PPT">
+                      <Label resid="Style.Wiki.Label" />
+                      <Supertip><Title resid="Style.Wiki.Label" /><Description resid="Style.Wiki.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyWikipedia</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickBB.PPT">
+                      <Label resid="Style.BB.Label" />
+                      <Supertip><Title resid="Style.BB.Label" /><Description resid="Style.BB.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyBluebook</FunctionName></Action>
+                    </Item>
+                    <Item id="TitleCapitalizer.QuickAMA.PPT">
+                      <Label resid="Style.AMA.Label" />
+                      <Supertip><Title resid="Style.AMA.Label" /><Description resid="Style.AMA.Tooltip" /></Supertip>
+                      <Icon><bt:Image size="16" resid="Icon.16x16" /><bt:Image size="32" resid="Icon.32x32" /><bt:Image size="80" resid="Icon.80x80" /></Icon>
+                      <Action xsi:type="ExecuteFunction"><FunctionName>applyAMA</FunctionName></Action>
+                    </Item>
+                  </Items>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16x16" DefaultValue="https://socrtwo.github.io/Title-Capitalizer/assets/icon-16.png" />
+        <bt:Image id="Icon.32x32" DefaultValue="https://socrtwo.github.io/Title-Capitalizer/assets/icon-32.png" />
+        <bt:Image id="Icon.80x80" DefaultValue="https://socrtwo.github.io/Title-Capitalizer/assets/icon-80.png" />
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://github.com/socrtwo/Title-Capitalizer" />
+        <bt:Url id="Commands.Url" DefaultValue="https://socrtwo.github.io/Title-Capitalizer/src/commands/commands.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://socrtwo.github.io/Title-Capitalizer/src/taskpane/taskpane.html" />
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="GetStarted.Title" DefaultValue="Title Capitalizer is ready!" />
+        <bt:String id="GroupLabel" DefaultValue="Title Capitalizer" />
+        <bt:String id="OpenTaskPane.Label" DefaultValue="Title Capitalizer" />
+        <bt:String id="QuickStyle.Label" DefaultValue="Quick Style" />
+        <bt:String id="Style.AP.Label" DefaultValue="AP Style" />
+        <bt:String id="Style.APA.Label" DefaultValue="APA Style" />
+        <bt:String id="Style.Chicago.Label" DefaultValue="Chicago Style" />
+        <bt:String id="Style.MLA.Label" DefaultValue="MLA Style" />
+        <bt:String id="Style.NYT.Label" DefaultValue="NY Times Style" />
+        <bt:String id="Style.Wiki.Label" DefaultValue="Wikipedia Style" />
+        <bt:String id="Style.BB.Label" DefaultValue="Bluebook Style" />
+        <bt:String id="Style.AMA.Label" DefaultValue="AMA Style" />
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="Select text in your document, then click Title Capitalizer to apply a style guide." />
+        <bt:String id="OpenTaskPane.Tooltip" DefaultValue="Open the Title Capitalizer task pane to configure style guide and case options." />
+        <bt:String id="QuickStyle.Tooltip" DefaultValue="Apply a built-in title-case style to the current selection without opening the task pane." />
+        <bt:String id="Style.AP.Tooltip" DefaultValue="Apply AP (Associated Press) title case to the selected text." />
+        <bt:String id="Style.APA.Tooltip" DefaultValue="Apply APA title case to the selected text." />
+        <bt:String id="Style.Chicago.Tooltip" DefaultValue="Apply Chicago Manual of Style title case to the selected text." />
+        <bt:String id="Style.MLA.Tooltip" DefaultValue="Apply MLA title case to the selected text." />
+        <bt:String id="Style.NYT.Tooltip" DefaultValue="Apply New York Times title case to the selected text." />
+        <bt:String id="Style.Wiki.Tooltip" DefaultValue="Apply Wikipedia title case to the selected text." />
+        <bt:String id="Style.BB.Tooltip" DefaultValue="Apply Bluebook (legal) title case to the selected text." />
+        <bt:String id="Style.AMA.Tooltip" DefaultValue="Apply AMA (American Medical Association) title case to the selected text." />
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

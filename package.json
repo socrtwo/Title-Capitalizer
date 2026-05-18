@@ -1,0 +1,30 @@
+{
+  "name": "title-capitalizer",
+  "version": "1.0.0",
+  "description": "Office Add-in that title-cases the active selection in Word, Excel, and PowerPoint. Supports AP, APA, Chicago, MLA, NY Times, Wikipedia, Bluebook, and AMA styles.",
+  "main": "src/lib/titlecase.js",
+  "scripts": {
+    "test": "node tests/test-titlecase.js",
+    "start": "node scripts/serve.js",
+    "icons": "python3 scripts/make-icons.py",
+    "build": "node scripts/build.js",
+    "release": "node scripts/release.js"
+  },
+  "keywords": [
+    "office-addin",
+    "word",
+    "excel",
+    "powerpoint",
+    "title-case",
+    "capitalize",
+    "ap-style",
+    "chicago-style",
+    "mla",
+    "apa"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/socrtwo/Title-Capitalizer.git"
+  }
+}
