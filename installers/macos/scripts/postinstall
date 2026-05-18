@@ -1,0 +1,39 @@
+#!/bin/bash
+# Postinstall script for the Title Capitalizer .pkg on macOS.
+#
+# Office for Mac sideloads add-ins from a per-host "wef" directory under
+# the user's sandboxed Containers folder. We drop the manifest in all
+# three (Word, Excel, PowerPoint) so the add-in becomes available in
+# every host.
+#
+# The .pkg is installed for the current user (no admin required), so we
+# work entirely under $HOME.
+
+set -e
+
+MANIFEST_NAME="manifest.xml"
+SRC="/Users/Shared/TitleCapitalizer/${MANIFEST_NAME}"
+
+# When pkg postinstalls run as the user, $HOME is correct. When run as
+# root via an admin package, fall back to the console user's home.
+if [ "$(id -u)" = "0" ] && [ -n "$USER" ] && [ "$USER" != "root" ]; then
+    TARGET_HOME=$(eval echo "~$USER")
+else
+    TARGET_HOME="$HOME"
+fi
+
+install_for_host() {
+    local host_dir="$1"
+    local target="${TARGET_HOME}/Library/Containers/${host_dir}/Data/Documents/wef"
+    mkdir -p "${target}"
+    cp "${SRC}" "${target}/${MANIFEST_NAME}"
+    if [ "$(id -u)" = "0" ] && [ -n "$USER" ]; then
+        chown "$USER" "${target}/${MANIFEST_NAME}" || true
+    fi
+}
+
+install_for_host "com.microsoft.Word"
+install_for_host "com.microsoft.Excel"
+install_for_host "com.microsoft.Powerpoint"
+
+exit 0
