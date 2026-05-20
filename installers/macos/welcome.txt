@@ -1,0 +1,8 @@
+Title Capitalizer for Microsoft Office
+
+This installer copies the Title Capitalizer add-in manifest into the
+"wef" sideload folders used by Word, Excel, and PowerPoint for Mac, so
+the add-in becomes available the next time you launch those apps.
+
+The install is per-user: nothing is written outside of your home
+folder, and no administrator password is required.

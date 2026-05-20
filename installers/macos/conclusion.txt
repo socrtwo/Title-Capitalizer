@@ -1,0 +1,15 @@
+Installation complete.
+
+Open Word, Excel, or PowerPoint, then click:
+
+    Insert > Add-ins  (or Insert > My Add-ins on older Office builds)
+
+Switch to the "Developer Add-ins" tab. Title Capitalizer will appear
+there. Click it to load the add-in - a "Title Capitalizer" group will
+appear on the Home tab.
+
+To remove the add-in, delete the file "manifest.xml" from each of:
+
+  ~/Library/Containers/com.microsoft.Word/Data/Documents/wef/
+  ~/Library/Containers/com.microsoft.Excel/Data/Documents/wef/
+  ~/Library/Containers/com.microsoft.Powerpoint/Data/Documents/wef/

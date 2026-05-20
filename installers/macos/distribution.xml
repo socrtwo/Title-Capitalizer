@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- productbuild distribution file for the Title Capitalizer .pkg. -->
+<installer-gui-script minSpecVersion="2">
+    <title>Title Capitalizer</title>
+    <organization>com.socrtwo.titlecapitalizer</organization>
+    <welcome file="welcome.txt" mime-type="text/plain"/>
+    <license file="LICENSE.txt" mime-type="text/plain"/>
+    <conclusion file="conclusion.txt" mime-type="text/plain"/>
+
+    <options
+        customize="never"
+        require-scripts="true"
+        rootVolumeOnly="false"
+        hostArchitectures="x86_64,arm64"
+    />
+
+    <!-- Install per-user (no admin) by default. -->
+    <domains enable_anywhere="false" enable_currentUserHome="true" enable_localSystem="false"/>
+
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.socrtwo.titlecapitalizer.core"/>
+        </line>
+    </choices-outline>
+
+    <choice id="default"/>
+    <choice id="com.socrtwo.titlecapitalizer.core" visible="false">
+        <pkg-ref id="com.socrtwo.titlecapitalizer.core"/>
+    </choice>
+
+    <pkg-ref id="com.socrtwo.titlecapitalizer.core" version="1.0.0" onConclusion="none">TitleCapitalizer-core.pkg</pkg-ref>
+</installer-gui-script>

@@ -1,0 +1,248 @@
+name: Build Installation Releases
+
+# Builds platform installers/packages for Title Capitalizer:
+#   - Windows: NSIS-built .exe that registers a Trusted Add-in Catalog
+#   - macOS:   pkgbuild/productbuild .pkg that drops the manifest into
+#              each Office host's "wef" sideload folder
+#   - iPad:    manifest + Admin Center deployment instructions (zip)
+#              (Office Add-ins on iPad cannot be installed by an
+#              executable; they must be deployed through a Microsoft 365
+#              admin account.)
+#   - Web:     manifest + upload instructions (zip)
+#              (Office on the Web has no executable installer either;
+#              the user uploads the manifest via "Upload My Add-in".)
+#
+# Triggers:
+#   - Push of a tag matching v*.*.* (e.g. v1.0.0) creates a GitHub Release.
+#   - Manual workflow_dispatch builds the same artifacts without
+#     publishing a release.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version label for artifact names (no leading v)'
+        required: false
+        default: '1.0.0'
+
+permissions:
+  contents: write   # needed to publish releases on tag pushes
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Windows: build a .exe installer with NSIS.
+  # ---------------------------------------------------------------------------
+  build-windows:
+    name: Build Windows installer (.exe)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install NSIS
+        shell: powershell
+        run: |
+          choco install nsis -y --no-progress
+          echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Stage installer payload
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path build\windows | Out-Null
+          Copy-Item installers\windows\installer.nsi build\windows\installer.nsi
+          Copy-Item installers\windows\INSTALL.txt   build\windows\INSTALL.txt
+          Copy-Item manifest.xml                     build\windows\manifest.xml
+          Copy-Item LICENSE                          build\windows\LICENSE.txt
+          # NSIS requires an .ico for MUI_ICON. Use the 32x32 PNG converted
+          # by ImageMagick-Convert (pre-installed on windows-latest).
+          magick assets\icon-128.png -define icon:auto-resize=256,128,64,48,32,16 build\windows\icon.ico
+
+      - name: Compile installer
+        shell: powershell
+        run: |
+          cd build\windows
+          makensis /V2 installer.nsi
+          if (-not (Test-Path TitleCapitalizer-Setup.exe)) {
+            throw "Installer did not build"
+          }
+
+      - name: Rename installer with version
+        shell: powershell
+        run: |
+          $ver = "${{ github.event.inputs.version }}"
+          if ([string]::IsNullOrEmpty($ver)) { $ver = "${{ github.ref_name }}" -replace '^v','' }
+          if ([string]::IsNullOrEmpty($ver)) { $ver = "1.0.0" }
+          Move-Item build\windows\TitleCapitalizer-Setup.exe "build\windows\TitleCapitalizer-${ver}-windows-setup.exe"
+          Get-ChildItem build\windows\*.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: build/windows/TitleCapitalizer-*-windows-setup.exe
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # macOS: build a .pkg installer with pkgbuild + productbuild.
+  # ---------------------------------------------------------------------------
+  build-macos:
+    name: Build macOS installer (.pkg)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Build .pkg
+        run: |
+          chmod +x installers/macos/build-pkg.sh installers/macos/scripts/postinstall
+          VERSION="${{ steps.ver.outputs.version }}" \
+            installers/macos/build-pkg.sh \
+            "$PWD/manifest.xml" \
+            "$PWD/LICENSE" \
+            "$PWD/build/macos"
+
+      - name: Rename installer with version
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          mv build/macos/TitleCapitalizer-Installer.pkg \
+             "build/macos/TitleCapitalizer-${ver}-macos.pkg"
+          ls -lh build/macos/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: build/macos/TitleCapitalizer-*-macos.pkg
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # iPad: package manifest + admin-center deployment instructions.
+  # There is no executable installer concept on iPad; the only supported
+  # ways to install an add-in are via Centralized Deployment (admin) or
+  # by signing into an account that already has the add-in attached.
+  # ---------------------------------------------------------------------------
+  build-ipad:
+    name: Build iPad package (.zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Stage payload
+        run: |
+          mkdir -p build/ipad/stage
+          cp manifest.xml LICENSE             build/ipad/stage/
+          cp installers/ipad/INSTALL.md       build/ipad/stage/
+
+      - name: Zip
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          cd build/ipad/stage
+          zip -rq "../TitleCapitalizer-${ver}-ipad.zip" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipad-package
+          path: build/ipad/TitleCapitalizer-*-ipad.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Web (Office Online): package manifest + manual upload instructions.
+  # Office on the Web has no executable installer either - the user uploads
+  # manifest.xml via "Upload My Add-in" in the browser UI.
+  # ---------------------------------------------------------------------------
+  build-web:
+    name: Build Web package (.zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Build dist and stage payload
+        run: |
+          node scripts/build.js
+          mkdir -p build/web/stage
+          cp -R dist/.                       build/web/stage/
+          cp installers/web/INSTALL.md       build/web/stage/INSTALL.md
+
+      - name: Zip
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          cd build/web/stage
+          zip -rq "../TitleCapitalizer-${ver}-web.zip" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-package
+          path: build/web/TitleCapitalizer-*-web.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Aggregate artifacts and (on tag push) publish a GitHub Release.
+  # ---------------------------------------------------------------------------
+  release:
+    name: Publish GitHub Release
+    needs: [build-windows, build-macos, build-ipad, build-web]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten artifacts
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec cp {} release/ \;
+          ls -lh release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Title Capitalizer ${{ github.ref_name }}
+          generate_release_notes: true
+          files: release/*
+          body: |
+            **Title Capitalizer** — Microsoft Office Add-in for AP, APA,
+            Chicago, MLA, NY Times, Wikipedia, Bluebook, and AMA title case.
+
+            ## Downloads
+
+            | Platform | Asset |
+            |----------|-------|
+            | Windows  | `TitleCapitalizer-<version>-windows-setup.exe` — NSIS installer that registers a Trusted Add-in Catalog |
+            | macOS    | `TitleCapitalizer-<version>-macos.pkg` — per-user .pkg that copies the manifest into Word/Excel/PowerPoint sideload folders |
+            | iPad     | `TitleCapitalizer-<version>-ipad.zip` — manifest + Microsoft 365 Admin Center deployment instructions |
+            | Web      | `TitleCapitalizer-<version>-web.zip` — manifest + web sideload instructions for Office Online |
+
+            > Office Add-ins on **iPad** and **Office for the Web** are not
+            > installed by an executable - they are sideloaded by uploading
+            > `manifest.xml` through Office itself (Web) or pushed via the
+            > Microsoft 365 Admin Center (iPad). The zips above include the
+            > exact steps in `INSTALL.md`.

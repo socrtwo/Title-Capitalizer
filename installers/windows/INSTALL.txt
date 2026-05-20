@@ -1,0 +1,24 @@
+Title Capitalizer for Microsoft Office
+======================================
+
+This installer has done two things:
+
+1. Copied manifest.xml into:
+       %LOCALAPPDATA%\TitleCapitalizer\catalog\
+
+2. Registered that folder as a Trusted Add-in Catalog for the current
+   Windows user.
+
+To finish enabling the add-in, open Word (or Excel/PowerPoint) and:
+
+   * Restart the Office app if it was already open.
+   * Go to Insert > My Add-ins (or Add-ins > More Add-ins on newer
+     Office builds).
+   * Switch to the SHARED FOLDER tab.
+   * Select "Title Capitalizer" and click Add.
+
+A "Title Capitalizer" group will appear on the Home tab. Click the
+button to open the task pane.
+
+To remove the add-in, use Settings > Apps > Title Capitalizer, or run
+the uninstall.exe in %LOCALAPPDATA%\TitleCapitalizer\.
