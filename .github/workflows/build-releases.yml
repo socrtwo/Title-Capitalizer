@@ -203,11 +203,128 @@ jobs:
           if-no-files-found: error
 
   # ---------------------------------------------------------------------------
+  # Linux: Office has no Linux desktop app, so the add-in is used through
+  # Office on the Web in any Linux browser. Same sideload-the-manifest flow as
+  # the Web package, with Linux-specific instructions.
+  # ---------------------------------------------------------------------------
+  build-linux:
+    name: Build Linux package (.zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Build dist and stage payload
+        run: |
+          node scripts/build.js
+          mkdir -p build/linux/stage
+          cp -R dist/.                         build/linux/stage/
+          cp installers/linux/INSTALL.md       build/linux/stage/INSTALL.md
+
+      - name: Zip
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          cd build/linux/stage
+          zip -rq "../TitleCapitalizer-${ver}-linux.zip" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-package
+          path: build/linux/TitleCapitalizer-*-linux.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # ChromeOS: Chromebooks run the add-in through Office on the Web in Chrome
+  # (or the Android Office apps). Same sideload-the-manifest flow, with
+  # ChromeOS-specific instructions.
+  # ---------------------------------------------------------------------------
+  build-chromeos:
+    name: Build ChromeOS package (.zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Build dist and stage payload
+        run: |
+          node scripts/build.js
+          mkdir -p build/chromeos/stage
+          cp -R dist/.                            build/chromeos/stage/
+          cp installers/chromeos/INSTALL.md       build/chromeos/stage/INSTALL.md
+
+      - name: Zip
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          cd build/chromeos/stage
+          zip -rq "../TitleCapitalizer-${ver}-chromeos.zip" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chromeos-package
+          path: build/chromeos/TitleCapitalizer-*-chromeos.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Android: the add-in is deployed to the Microsoft 365 account and appears in
+  # the Office Android apps (or Office on the Web in Chrome for Android). Same
+  # sideload-the-manifest flow, with Android-specific instructions.
+  # ---------------------------------------------------------------------------
+  build-android:
+    name: Build Android package (.zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Build dist and stage payload
+        run: |
+          node scripts/build.js
+          mkdir -p build/android/stage
+          cp -R dist/.                           build/android/stage/
+          cp installers/android/INSTALL.md       build/android/stage/INSTALL.md
+
+      - name: Zip
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          cd build/android/stage
+          zip -rq "../TitleCapitalizer-${ver}-android.zip" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-package
+          path: build/android/TitleCapitalizer-*-android.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
   # Aggregate artifacts and (on tag push) publish a GitHub Release.
   # ---------------------------------------------------------------------------
   release:
     name: Publish GitHub Release
-    needs: [build-windows, build-macos, build-ipad, build-web]
+    needs: [build-windows, build-macos, build-ipad, build-web, build-linux, build-chromeos, build-android]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -240,6 +357,9 @@ jobs:
             | macOS    | `TitleCapitalizer-<version>-macos.pkg` — per-user .pkg that copies the manifest into Word/Excel/PowerPoint sideload folders |
             | iPad     | `TitleCapitalizer-<version>-ipad.zip` — manifest + Microsoft 365 Admin Center deployment instructions |
             | Web      | `TitleCapitalizer-<version>-web.zip` — manifest + web sideload instructions for Office Online |
+            | Linux    | `TitleCapitalizer-<version>-linux.zip` — manifest + Office-on-the-Web sideload instructions for Linux browsers |
+            | ChromeOS | `TitleCapitalizer-<version>-chromeos.zip` — manifest + Office-on-the-Web / Android sideload instructions for Chromebooks |
+            | Android  | `TitleCapitalizer-<version>-android.zip` — manifest + sideload instructions for the Office Android apps |
 
             > Office Add-ins on **iPad** and **Office for the Web** are not
             > installed by an executable - they are sideloaded by uploading
