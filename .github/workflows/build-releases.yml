@@ -14,8 +14,10 @@ name: Build Installation Releases
 #
 # Triggers:
 #   - Push of a tag matching v*.*.* (e.g. v1.0.0) creates a GitHub Release.
-#   - Manual workflow_dispatch builds the same artifacts without
-#     publishing a release.
+#   - Manual workflow_dispatch builds the same artifacts and, when the
+#     "version" input is set (it defaults to 1.0.0), publishes a GitHub
+#     Release whose tag v<version> is created server-side at the
+#     dispatched ref.
 
 on:
   push:
@@ -495,7 +497,7 @@ jobs:
     name: Publish GitHub Release
     needs: [build-windows, build-macos, build-linux, build-chromeos, build-android, build-ios, build-ipad, build-web]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.version != '')
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -511,7 +513,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Title Capitalizer ${{ github.ref_name }}
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', inputs.version) || github.ref_name }}
+          name: Title Capitalizer ${{ github.event_name == 'workflow_dispatch' && format('v{0}', inputs.version) || github.ref_name }}
           generate_release_notes: true
           files: release/*
           body: |
