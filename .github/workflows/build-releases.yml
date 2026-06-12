@@ -164,6 +164,292 @@ jobs:
           if-no-files-found: error
 
   # ---------------------------------------------------------------------------
+  # Linux: package manifest + Office on the web sideload instructions.
+  # Desktop Office does not exist on Linux, so the supported install path is
+  # Office on the web (office.com) via "Upload My Add-in".
+  # ---------------------------------------------------------------------------
+  build-linux:
+    name: Build Linux package (.zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Stage payload
+        run: |
+          mkdir -p build/linux/stage
+          cp manifest.xml LICENSE build/linux/stage/
+          printf '%s\n' \
+            '# Title Capitalizer on Linux' \
+            '' \
+            '> **Desktop Microsoft Office does not exist on Linux**, so there is no' \
+            '> executable installer. The supported way to use this add-in on Linux is' \
+            '> **Office on the web** (https://www.office.com) - upload the included' \
+            '> `manifest.xml` once and the add-in follows your Microsoft account.' \
+            '' \
+            '## Install via Office on the web' \
+            '' \
+            '1. In any Linux browser (Firefox, Chrome, Chromium, etc.), sign in at' \
+            '   https://www.office.com and open Word, Excel, or PowerPoint for the web.' \
+            '2. Open or create a document.' \
+            '3. Choose **Insert > Add-ins** (on some tenants: **Home > Add-ins**),' \
+            '   then click **More Add-ins**.' \
+            '4. Switch to the **My Add-ins** tab and choose **Manage My Add-ins >' \
+            '   Upload My Add-in**.' \
+            '5. Browse to the `manifest.xml` in this archive and click **Upload**.' \
+            '6. A **Title Capitalizer** group appears on the **Home** tab. The add-in' \
+            '   stays installed for your account across browsers and devices.' \
+            '' \
+            '## Org-wide install (Microsoft 365 admins)' \
+            '' \
+            'Use Microsoft 365 Admin Center > **Settings > Integrated apps > Upload' \
+            'custom apps** and upload the `manifest.xml` from this archive.' \
+            > build/linux/stage/INSTALL.md
+
+      - name: Zip
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          cd build/linux/stage
+          zip -rq "../TitleCapitalizer-${ver}-linux.zip" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-package
+          path: build/linux/TitleCapitalizer-*-linux.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # ChromeOS: package manifest + Office on the web sideload instructions.
+  # ChromeOS has no desktop Office either; Office on the web in the Chrome
+  # browser is the supported install path.
+  # ---------------------------------------------------------------------------
+  build-chromeos:
+    name: Build ChromeOS package (.zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Stage payload
+        run: |
+          mkdir -p build/chromeos/stage
+          cp manifest.xml LICENSE build/chromeos/stage/
+          printf '%s\n' \
+            '# Title Capitalizer on ChromeOS' \
+            '' \
+            '> **There is no desktop Microsoft Office for ChromeOS**, so there is no' \
+            '> executable installer. On a Chromebook the supported way to use this' \
+            '> add-in is **Office on the web** (https://www.office.com) in the Chrome' \
+            '> browser - upload the included `manifest.xml` once and the add-in' \
+            '> follows your Microsoft account.' \
+            '' \
+            '## Install via Office on the web (Chrome browser)' \
+            '' \
+            '1. On your Chromebook, open Chrome, sign in at https://www.office.com,' \
+            '   and open Word, Excel, or PowerPoint for the web.' \
+            '2. Open or create a document.' \
+            '3. Choose **Insert > Add-ins** (on some tenants: **Home > Add-ins**),' \
+            '   then click **More Add-ins**.' \
+            '4. Switch to the **My Add-ins** tab and choose **Manage My Add-ins >' \
+            '   Upload My Add-in**.' \
+            '5. Browse to the `manifest.xml` in this archive (use the ChromeOS Files' \
+            '   app picker) and click **Upload**.' \
+            '6. A **Title Capitalizer** group appears on the **Home** tab. The add-in' \
+            '   stays installed for your account across devices.' \
+            '' \
+            '## Org-wide install (Microsoft 365 admins)' \
+            '' \
+            'Use Microsoft 365 Admin Center > **Settings > Integrated apps > Upload' \
+            'custom apps** and upload the `manifest.xml` from this archive.' \
+            > build/chromeos/stage/INSTALL.md
+
+      - name: Zip
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          cd build/chromeos/stage
+          zip -rq "../TitleCapitalizer-${ver}-chromeos.zip" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chromeos-package
+          path: build/chromeos/TitleCapitalizer-*-chromeos.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Android: package manifest + admin-center deployment instructions.
+  # Like iPad/iOS, Office mobile apps on Android cannot install an add-in
+  # from an executable; add-ins reach the device via Microsoft 365
+  # Centralized Deployment (or an account that already has the add-in).
+  # ---------------------------------------------------------------------------
+  build-android:
+    name: Build Android package (.zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Stage payload
+        run: |
+          mkdir -p build/android/stage
+          cp manifest.xml LICENSE build/android/stage/
+          printf '%s\n' \
+            '# Title Capitalizer on Android' \
+            '' \
+            '> **There is no installable executable for Office Add-ins on Android.**' \
+            '> The Office mobile apps do not let third parties drop manifests into' \
+            '> their storage. The add-in still works on Android - it just has to' \
+            '> reach the device through an account that already trusts it.' \
+            '' \
+            'You have two supported options:' \
+            '' \
+            '## Option 1 - Use a Microsoft 365 account that already has the add-in' \
+            '' \
+            'If you (or your IT admin) have published Title Capitalizer to your' \
+            'Microsoft 365 tenant via Centralized Deployment (see Option 2), sign' \
+            'into Word/Excel/PowerPoint on Android with that same account. The' \
+            'add-in will appear automatically in **Home > Add-ins** within ~24 hours.' \
+            '' \
+            '## Option 2 - Deploy via Microsoft 365 Admin Center' \
+            '' \
+            'Anyone with the **Global Admin** or **Exchange Admin** role on a' \
+            'Microsoft 365 tenant can deploy this add-in to all users (including' \
+            'Android):' \
+            '' \
+            '1. Sign in to https://admin.microsoft.com.' \
+            '2. In the left nav, choose **Settings > Integrated apps**.' \
+            '3. Click **Upload custom apps**.' \
+            '4. Select **Office Add-in**, then **Upload manifest file (.xml)** and' \
+            '   choose the `manifest.xml` from this archive.' \
+            '5. Pick the users / groups who should receive the add-in. Android users' \
+            '   in scope will see the add-in automatically.' \
+            '' \
+            'Reference: https://learn.microsoft.com/microsoft-365/admin/manage/test-and-deploy-microsoft-365-apps' \
+            '' \
+            '## Option 3 - Per-document sideload (limited)' \
+            '' \
+            'For one-off use, you can open a document in Office for the Web' \
+            '(office.com) in the Android browser (request the desktop site) or on a' \
+            'desktop, upload the manifest there (see the web INSTALL.md), and then' \
+            'continue editing on Android. The add-in stays associated with your' \
+            'account, so it will appear in the Add-ins list on Android too.' \
+            > build/android/stage/INSTALL.md
+
+      - name: Zip
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          cd build/android/stage
+          zip -rq "../TitleCapitalizer-${ver}-android.zip" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-package
+          path: build/android/TitleCapitalizer-*-android.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # iOS (iPhone + iPad): same payload as the iPad package, published under an
+  # "ios"-named asset so every platform has a named artifact. The iPad zip is
+  # kept for continuity with earlier releases.
+  # ---------------------------------------------------------------------------
+  build-ios:
+    name: Build iOS package (.zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          ver="${{ github.event.inputs.version }}"
+          if [ -z "$ver" ]; then ver="${GITHUB_REF_NAME#v}"; fi
+          if [ -z "$ver" ]; then ver="1.0.0"; fi
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Stage payload
+        run: |
+          mkdir -p build/ios/stage
+          cp manifest.xml LICENSE build/ios/stage/
+          printf '%s\n' \
+            '# Title Capitalizer on iOS (iPhone and iPad)' \
+            '' \
+            '> **There is no installable executable for Office Add-ins on iPhone or' \
+            '> iPad.** The iOS app sandbox does not let third parties drop manifests' \
+            '> into the Office container. The add-in still works on iOS - it just' \
+            '> has to reach the device through an account that already trusts it.' \
+            '' \
+            'You have two supported options:' \
+            '' \
+            '## Option 1 - Use a Microsoft 365 account that already has the add-in' \
+            '' \
+            'If you (or your IT admin) have published Title Capitalizer to your' \
+            'Microsoft 365 tenant via Centralized Deployment (see Option 2), sign' \
+            'into Word/Excel/PowerPoint on your iPhone or iPad with that same' \
+            'account. The add-in will appear automatically in **Home > Add-ins**' \
+            'within ~24 hours.' \
+            '' \
+            '## Option 2 - Deploy via Microsoft 365 Admin Center' \
+            '' \
+            'Anyone with the **Global Admin** or **Exchange Admin** role on a' \
+            'Microsoft 365 tenant can deploy this add-in to all users (including' \
+            'iPhone and iPad):' \
+            '' \
+            '1. Sign in to https://admin.microsoft.com.' \
+            '2. In the left nav, choose **Settings > Integrated apps**.' \
+            '3. Click **Upload custom apps**.' \
+            '4. Select **Office Add-in**, then **Upload manifest file (.xml)** and' \
+            '   choose the `manifest.xml` from this archive.' \
+            '5. Pick the users / groups who should receive the add-in. iPhone and' \
+            '   iPad users in scope will see the add-in automatically.' \
+            '' \
+            'Reference: https://learn.microsoft.com/microsoft-365/admin/manage/test-and-deploy-microsoft-365-apps' \
+            '' \
+            '## Option 3 - Per-document sideload (limited)' \
+            '' \
+            'For one-off use, you can open a document in Office for the Web' \
+            '(office.com) on a desktop, upload the manifest there (see the web' \
+            'INSTALL.md), and then continue editing on your iPhone or iPad. The' \
+            'add-in stays associated with your account, so it will appear in the' \
+            'Add-ins list on iOS too.' \
+            > build/ios/stage/INSTALL.md
+
+      - name: Zip
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          cd build/ios/stage
+          zip -rq "../TitleCapitalizer-${ver}-ios.zip" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-package
+          path: build/ios/TitleCapitalizer-*-ios.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
   # Web (Office Online): package manifest + manual upload instructions.
   # Office on the Web has no executable installer either - the user uploads
   # manifest.xml via "Upload My Add-in" in the browser UI.
@@ -207,7 +493,7 @@ jobs:
   # ---------------------------------------------------------------------------
   release:
     name: Publish GitHub Release
-    needs: [build-windows, build-macos, build-ipad, build-web]
+    needs: [build-windows, build-macos, build-linux, build-chromeos, build-android, build-ios, build-ipad, build-web]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -238,11 +524,16 @@ jobs:
             |----------|-------|
             | Windows  | `TitleCapitalizer-<version>-windows-setup.exe` — NSIS installer that registers a Trusted Add-in Catalog |
             | macOS    | `TitleCapitalizer-<version>-macos.pkg` — per-user .pkg that copies the manifest into Word/Excel/PowerPoint sideload folders |
+            | Linux    | `TitleCapitalizer-<version>-linux.zip` — manifest + Office on the web sideload instructions (no desktop Office on Linux) |
+            | ChromeOS | `TitleCapitalizer-<version>-chromeos.zip` — manifest + Office on the web sideload instructions for Chrome |
+            | Android  | `TitleCapitalizer-<version>-android.zip` — manifest + Microsoft 365 Admin Center deployment instructions |
+            | iOS      | `TitleCapitalizer-<version>-ios.zip` — manifest + Microsoft 365 Admin Center deployment instructions (iPhone + iPad) |
             | iPad     | `TitleCapitalizer-<version>-ipad.zip` — manifest + Microsoft 365 Admin Center deployment instructions |
             | Web      | `TitleCapitalizer-<version>-web.zip` — manifest + web sideload instructions for Office Online |
 
-            > Office Add-ins on **iPad** and **Office for the Web** are not
-            > installed by an executable - they are sideloaded by uploading
-            > `manifest.xml` through Office itself (Web) or pushed via the
-            > Microsoft 365 Admin Center (iPad). The zips above include the
-            > exact steps in `INSTALL.md`.
+            > Office Add-ins on **Linux**, **ChromeOS**, **Android**, **iOS/iPad**
+            > and **Office for the Web** are not installed by an executable - they
+            > are sideloaded by uploading `manifest.xml` through Office on the web
+            > (Linux / ChromeOS / Web) or pushed via the Microsoft 365 Admin
+            > Center (Android / iOS / iPad). The zips above include the exact
+            > steps in `INSTALL.md`.
